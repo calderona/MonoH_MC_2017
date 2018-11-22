@@ -4,6 +4,8 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: Configuration/GenProduction/python/ThirteenTeV/pythia8_hadronizer_HWWHbb_cff.py --fileout file:step1.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions auto:mc --beamspot Realistic8TeVCollision --step GEN --python_filename step1.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 10 --filein file:step0_numEvent10.root
 import FWCore.ParameterSet.Config as cms
+from Configuration.Generator.Pythia8CommonSettings_cfi import *
+from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 process = cms.Process('GEN')
 
@@ -28,7 +30,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
-    fileNames = cms.untracked.vstring('file:step0_numEvent10.root'),
+    fileNames = cms.untracked.vstring('file:Zprime_A0h_A0chichi_MZp800_MA0300_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz_numEvent10.root'),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop LHEXMLStringProduct_*_*_*'),
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False)
@@ -69,41 +71,29 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:mc', '')
 
 process.generator = cms.EDFilter("Pythia8HadronizerFilter",
-    pythiaPylistVerbosity = cms.untracked.int32(1),
-    filterEfficiency = cms.untracked.double(1.0),
-    pythiaHepMCVerbosity = cms.untracked.bool(False),
-    comEnergy = cms.double(13000.0),
-    maxEventsToPrint = cms.untracked.int32(1),
-    PythiaParameters = cms.PSet(
-        pythia8CommonSettings = cms.vstring('Tune:preferLHAPDF = 2', 
-            'Main:timesAllowErrors = 10000', 
-            'Check:epTolErr = 0.01', 
-            'Beams:setProductionScalesFromLHEF = off', 
-            'SLHA:keepSM = on', 
-            'SLHA:minMassSM = 1000.', 
-            'ParticleDecays:limitTau0 = on', 
-            'ParticleDecays:tau0Max = 10', 
-            'ParticleDecays:allowPhotonRadiation = on'),
-        pythia8CUEP8M1Settings = cms.vstring('Tune:pp 14', 
-            'Tune:ee 7', 
-            'MultipartonInteractions:pT0Ref=2.4024', 
-            'MultipartonInteractions:ecmPow=0.25208', 
-            'MultipartonInteractions:expPow=1.6'),
-        processParameters = cms.vstring('SLHA:useDecayTable = off', 
-            '24:mMin = 0.05', 
-            '24:onMode = on', 
+		    maxEventsToPrint = cms.untracked.int32(1),
+                    pythiaPylistVerbosity = cms.untracked.int32(1),
+                    filterEfficiency = cms.untracked.double(1.0),
+                    pythiaHepMCVerbosity = cms.untracked.bool(False),
+                    comEnergy = cms.double(13000.),
+                    PythiaParameters = cms.PSet(
+        pythia8CommonSettingsBlock,
+        pythia8CUEP8M1SettingsBlock,
+        processParameters = cms.vstring(
+            'SLHA:useDecayTable = off',  # Use pythia8s own decay mode instead of decays defined in LH accord
             '25:m0 = 125.0', 
-            '25:onMode = off', 
-            '25:onIfMatch = 5 -5', 
-            '25:onIfMatch = 24 -24', 
-            'ResonanceDecayFilter:filter = on', 
-            'ResonanceDecayFilter:exclusive = on', 
-            'ResonanceDecayFilter:mothers = 25', 
-            'ResonanceDecayFilter:daughters = 5,5,24,-24'),
-        parameterSets = cms.vstring('pythia8CommonSettings', 
-            'pythia8CUEP8M1Settings', 
-            'processParameters')
-    )
+            '25:onMode = off',
+            '25:onIfMatch = 24 -24',           # turn ON H->WW
+            '24:mMin = 0.05',                  #  
+            '24:onMode = off',                 # turn OFF all W decays
+            '24:onIfAny = 11 13 15 12 14 16'   # turn ON W->lnu
+
+            ),
+        parameterSets = cms.vstring('pythia8CommonSettings',
+                                    'pythia8CUEP8M1Settings',
+                                    'processParameters'
+                                    )
+        )
 )
 
 
