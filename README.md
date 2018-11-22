@@ -41,7 +41,7 @@ cmsRun step0.py tarball=xxx.xz outputFile=test.root maxEvents=10
 
 Take your hadronizer from Configuration/GenProduction/python/ThirteenTeV/monoHiggs and copy it to the step1.py file
 
-Here I took the WW decay:
+Here I took the WW decay: https://github.com/fmanteca/MonoH_MC_2017/blob/master/step1.py#L73-L97
 
 ```
 cmsRun step1.py 
